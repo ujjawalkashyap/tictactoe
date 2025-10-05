@@ -1,7 +1,8 @@
-package src.boards;
+package boards;
 
-import src.game.Board;
-import src.game.Cell;
+import game.Board;
+import game.Cell;
+import game.Move;
 
 public class TicTacToeBoard extends Board {
     String[][] cells = new String[3][3];
@@ -27,5 +28,10 @@ public class TicTacToeBoard extends Board {
             result.append('\n');
         }
         return result.toString();
+    }
+
+    @Override
+    public void move(Move move){
+        setCell(move.getPlayer().symbol(), move.getCell());
     }
 }

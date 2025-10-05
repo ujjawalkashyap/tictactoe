@@ -1,10 +1,10 @@
-package src.game;
+package game;
 
-public class GameResult {
+public class GameState {
     boolean isComplete;
     String winner;
 
-    public GameResult(boolean isComplete, String winner) {
+    public GameState(boolean isComplete, String winner) {
         this.isComplete = isComplete;
         this.winner = winner;
     }
