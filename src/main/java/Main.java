@@ -1,5 +1,3 @@
-package src;
-
 import api.AIEngine;
 import api.GameEngine;
 import api.RuleEngine;
@@ -16,7 +14,7 @@ public class Main {
         RuleEngine ruleEngine = new RuleEngine();
         AIEngine aiEngine = new AIEngine();
         Board board = gameEngine.start("TicTacToe");
-        while(!ruleEngine.isCompleted(board).isOver()){
+        while(!ruleEngine.getState(board).isOver()){
             Player human = new Player("O");
             Scanner sc = new Scanner(System.in);
             System.out.println("Make your move!");
@@ -27,13 +25,13 @@ public class Main {
             gameEngine.move(board, opponentsMove);
             System.out.println(board);
             Player computer = new Player("X");
-            if(!ruleEngine.isCompleted(board).isOver()){
+            if(!ruleEngine.getState(board).isOver()){
                 Move computersMove = aiEngine.suggestMove(board, computer);
                 gameEngine.move(board, computersMove);
                 System.out.println(board);
             }
         }
-        System.out.println("GameResult" + ruleEngine.isCompleted(board));
+        System.out.println("GameResult" + ruleEngine.getState(board));
         System.out.println(board);
     }
 }

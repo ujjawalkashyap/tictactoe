@@ -5,7 +5,7 @@ import game.Board;
 import game.GameState;
 
 public class RuleEngine {
-    public GameState isCompleted(Board board){
+    public GameState getState(Board board){
         if(board instanceof TicTacToeBoard){
             TicTacToeBoard board1 = (TicTacToeBoard) board;
             boolean rowComplete = true;
