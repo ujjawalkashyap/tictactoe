@@ -4,75 +4,55 @@ import boards.TicTacToeBoard;
 import game.Board;
 import game.GameState;
 
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 public class RuleEngine {
+    public GameState findStreak(BiFunction<Integer, Integer, String> next){
+        for(int i=0;i<3;i++){
+            boolean possibleStreak = true;
+            for(int j=0;j<3;j++){
+                if(next.apply(i,j)==null||!next.apply(i,0).equals(next.apply(i,j))){
+                    possibleStreak = false;
+                    break;
+                }
+            }
+            if(possibleStreak) {
+                return new GameState(true, next.apply(i,0));
+            }
+        }
+        return null;
+    }
+    public GameState findDiagStreak(Function<Integer, String> diagFunc){
+        boolean possibleStreak = true;
+        for (int j = 0; j < 3; j++) {
+            if (diagFunc.apply(j)==null||!diagFunc.apply(j).equals(diagFunc.apply(j))) {
+                possibleStreak = false;
+                break;
+            }
+        }
+        if(possibleStreak){
+            return new GameState(true,diagFunc.apply(0));
+        }
+        return null;
+    }
     public GameState getState(Board board){
         if(board instanceof TicTacToeBoard){
             TicTacToeBoard board1 = (TicTacToeBoard) board;
-            boolean rowComplete = true;
-            String firstCharacter = "-";
-            for(int i=0;i<3;i++){
-                firstCharacter = board1.getSymbol(i,0);
-                rowComplete = firstCharacter!=null;
-                if(firstCharacter!=null){
-                    for(int j=0;j<3;j++){
-                        if(!firstCharacter.equals(board1.getSymbol(i,j))){
-                            rowComplete = false;
-                            break;
-                        }
-                    }
-                }
-                if(rowComplete)
-                    break;
-            }
+            GameState rowWin = findStreak((i,j)->board1.getSymbol(i, j));
+            if(rowWin!=null) return rowWin;
 
-            if(rowComplete){
-                return new GameState(true, firstCharacter);
-            }
-            boolean colComplete =true;
-            for(int i=0;i<3;i++){
-                firstCharacter = board1.getSymbol(0, i);
-                colComplete = firstCharacter!=null;
-                if(firstCharacter!=null){
-                    for(int j=1;j<3;j++){
-                        if(!firstCharacter.equals(board1.getSymbol(j,i))){
-                            colComplete = false;
-                            break;
-                        }
-                    }
-                }
-                if(colComplete)
-                    break;
-            }
-            if(colComplete){
-                return new GameState(true, firstCharacter);
-            }
+            GameState colWin = findStreak((i,j)->board1.getSymbol(j,i));
+            if(colWin!=null) return colWin;
 
-            firstCharacter = board1.getSymbol(0,0);
-            boolean DiagonalComplete = firstCharacter!=null;
-            if(firstCharacter!=null){
-                for(int j=1;j<3;j++){
-                    if(!firstCharacter.equals(board1.getSymbol(j,j))){
-                        DiagonalComplete = false;
-                        break;
-                    }
-                }
-            }
-            if(DiagonalComplete){
-                return new GameState(true, firstCharacter);
-            }
-            firstCharacter = board1.getSymbol(0, 2);
-            boolean revDiagonalComplete = firstCharacter!=null;
-            if(firstCharacter!=null) {
-                for (int j = 1; j < 3; j++) {
-                    if (!firstCharacter.equals(board1.getSymbol(j, 2 - j))) {
-                        revDiagonalComplete = false;
-                        break;
-                    }
-                }
-            }
-            if(revDiagonalComplete){
-                return new GameState(true, firstCharacter);
-            }
+            Function<Integer, String> diag = (i)->((TicTacToeBoard) board).getSymbol(i,i);
+            Function<Integer, String> revDiag = (i)->((TicTacToeBoard) board).getSymbol(i,2-i);
+
+            GameState diagWin = findDiagStreak(diag);
+            if(diagWin!=null) return diagWin;
+
+            GameState revDiagWin = findDiagStreak(revDiag);
+            if(revDiagWin!=null) return revDiagWin;
 
             int numberOfFilledCells = 0;
             for(int i=0;i<3;i++){
