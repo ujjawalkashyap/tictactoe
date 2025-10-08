@@ -8,51 +8,52 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class RuleEngine {
-    public GameState findStreak(BiFunction<Integer, Integer, String> next){
-        for(int i=0;i<3;i++){
-            boolean possibleStreak = true;
-            for(int j=0;j<3;j++){
-                if(next.apply(i,j)==null||!next.apply(i,0).equals(next.apply(i,j))){
-                    possibleStreak = false;
-                    break;
-                }
-            }
-            if(possibleStreak) {
-                return new GameState(true, next.apply(i,0));
-            }
-        }
-        return null;
-    }
-    public GameState findDiagStreak(Function<Integer, String> diagFunc){
+    public GameState traverse(Function<Integer, String> traversal){
+        GameState result = new GameState(false, "-");
         boolean possibleStreak = true;
-        for (int j = 0; j < 3; j++) {
-            if (diagFunc.apply(j)==null||!diagFunc.apply(j).equals(diagFunc.apply(j))) {
+        for (int j=0;j<3;j++) {
+            if (traversal.apply(j)==null||!traversal.apply(0).equals(traversal.apply(j))) {
                 possibleStreak = false;
                 break;
             }
         }
         if(possibleStreak){
-            return new GameState(true,diagFunc.apply(0));
+            return new GameState(true,traversal.apply(0));
         }
-        return null;
+        return result;
+    }
+    public GameState outerTraversal(BiFunction<Integer, Integer, String> next){
+        GameState result = new GameState(false, "-");
+        for(int i=0;i<3;i++){
+            final int ii = i;
+            GameState traversal = traverse(j->next.apply(ii, j));
+            if(traversal.isOver()){
+                result = traversal;
+                break;
+            }
+        }
+        return result;
+    }
+    public GameState findDiagStreak(Function<Integer, String> diagFunc){
+        return traverse(diagFunc);
     }
     public GameState getState(Board board){
         if(board instanceof TicTacToeBoard){
             TicTacToeBoard board1 = (TicTacToeBoard) board;
-            GameState rowWin = findStreak((i,j)->board1.getSymbol(i, j));
-            if(rowWin!=null) return rowWin;
+            GameState rowWin = outerTraversal((i,j)->board1.getSymbol(i, j));
+            if(rowWin.isOver()) return rowWin;
 
-            GameState colWin = findStreak((i,j)->board1.getSymbol(j,i));
-            if(colWin!=null) return colWin;
+            GameState colWin = outerTraversal((i,j)->board1.getSymbol(j,i));
+            if(colWin.isOver()) return colWin;
 
             Function<Integer, String> diag = (i)->((TicTacToeBoard) board).getSymbol(i,i);
             Function<Integer, String> revDiag = (i)->((TicTacToeBoard) board).getSymbol(i,2-i);
 
             GameState diagWin = findDiagStreak(diag);
-            if(diagWin!=null) return diagWin;
+            if(diagWin.isOver()) return diagWin;
 
             GameState revDiagWin = findDiagStreak(revDiag);
-            if(revDiagWin!=null) return revDiagWin;
+            if(revDiagWin.isOver()) return revDiagWin;
 
             int numberOfFilledCells = 0;
             for(int i=0;i<3;i++){
